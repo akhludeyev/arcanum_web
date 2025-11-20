@@ -1,13 +1,6 @@
 {
-    "version": 2,
-    "buildCommand": "npm install && npm run build --workspace=@arcanum/web",
+    "buildCommand": "cd apps/web && npm install && npm run build",
     "outputDirectory": "apps/web/dist",
     "installCommand": "npm install",
-    "framework": "vite",
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ]
+    "devCommand": "cd apps/web && npm run dev"
 }
