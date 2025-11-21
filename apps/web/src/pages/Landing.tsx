@@ -1,38 +1,36 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Spinner from '../components/Spinner';
-import { AppContextType } from '../App';
 import { getRandomArcana } from '../data/arcanas';
 
-interface LandingProps {
-  context: AppContextType;
-}
-
-export default function Landing({ context }: LandingProps) {
+export default function Landing() {
+  const navigate = useNavigate();
   const [birthDate, setBirthDate] = useState('');
   const [isCalculating, setIsCalculating] = useState(false);
 
   const handleCalculate = () => {
     if (!birthDate) {
-      context.showToast('Пожалуйста, введите дату рождения', 'error');
+      alert('Пожалуйста, введите дату рождения');
       return;
     }
 
     setIsCalculating(true);
-    
+
     // Simulate calculation
     setTimeout(() => {
       const matrix = Array(8).fill(0).map(() => getRandomArcana());
       setIsCalculating(false);
-      context.navigateTo('matrix-result', { birthDate, matrix });
+      // TODO: Navigate to matrix result with data
+      navigate('/dashboard');
     }, 1500);
   };
 
   const formatDate = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     let formatted = '';
-    
+
     if (numbers.length > 0) {
       formatted = numbers.substring(0, 2);
     }
@@ -42,7 +40,7 @@ export default function Landing({ context }: LandingProps) {
     if (numbers.length > 4) {
       formatted += '.' + numbers.substring(4, 8);
     }
-    
+
     return formatted;
   };
 
@@ -53,8 +51,8 @@ export default function Landing({ context }: LandingProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header context={context} />
-      
+      <Header />
+
       <main className="flex-1 pt-16 md:pt-20">
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-gray-50 to-white py-12 md:py-20">
@@ -134,7 +132,7 @@ export default function Landing({ context }: LandingProps) {
 
             <div className="mt-12 text-center">
               <button
-                onClick={() => context.navigateTo('subscription')}
+                onClick={() => navigate('/subscription')}
                 className="px-8 py-3 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition-colors"
               >
                 Узнать о Premium подписке
@@ -152,16 +150,16 @@ export default function Landing({ context }: LandingProps) {
               </h2>
               <div className="bg-white rounded-lg shadow-sm p-6 md:p-8 space-y-4 text-gray-700">
                 <p>
-                  Матрица Судьбы — это метод самопознания, основанный на нумерологии и арканах Таро. 
-                  Каждая дата рождения содержит уникальный код, раскрывающий ваши таланты, предназначение 
+                  Матрица Судьбы — это метод самопознания, основанный на нумерологии и арканах Таро.
+                  Каждая дата рождения содержит уникальный код, раскрывающий ваши таланты, предназначение
                   и кармические задачи.
                 </p>
                 <p>
-                  Расчёт матрицы помогает понять свои сильные и слабые стороны, улучшить отношения, 
+                  Расчёт матрицы помогает понять свои сильные и слабые стороны, улучшить отношения,
                   найти своё призвание и гармонизировать все сферы жизни.
                 </p>
                 <p>
-                  Наш сервис предоставляет детальную интерпретацию каждого аркана в вашей матрице 
+                  Наш сервис предоставляет детальную интерпретацию каждого аркана в вашей матрице
                   с практическими рекомендациями для проработки.
                 </p>
               </div>
