@@ -1,15 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
 import Spinner from '../components/Spinner';
-import { AppContextType } from '../App';
+import { useAuthStore } from '../store/useAuthStore';
 import { getArcanaData, getRandomArcana } from '../data/arcanas';
 import { User } from 'lucide-react';
-
-interface ChildRoleProps {
-  context: AppContextType;
-}
 
 interface RoleDetails {
   role: string;
@@ -103,7 +100,9 @@ const roleData: Record<string, RoleDetails> = {
   }
 };
 
-export default function ChildRole({ context }: ChildRoleProps) {
+export default function ChildRole() {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [childDate, setChildDate] = useState('');
   const [motherDate, setMotherDate] = useState('');
   const [fatherDate, setFatherDate] = useState('');
@@ -114,7 +113,7 @@ export default function ChildRole({ context }: ChildRoleProps) {
   const formatDate = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     let formatted = '';
-    
+
     if (numbers.length > 0) {
       formatted = numbers.substring(0, 2);
     }
@@ -124,18 +123,18 @@ export default function ChildRole({ context }: ChildRoleProps) {
     if (numbers.length > 4) {
       formatted += '.' + numbers.substring(4, 8);
     }
-    
+
     return formatted;
   };
 
   const handleCalculate = () => {
     if (!childDate || !motherDate || !fatherDate) {
-      context.showToast('Пожалуйста, введите все три даты', 'error');
+      alert('Пожалуйста, введите все три даты');
       return;
     }
 
     setIsCalculating(true);
-    
+
     setTimeout(() => {
       const roles = ['cleanser', 'innovator'];
       const selectedRole = roles[Math.floor(Math.random() * roles.length)];
@@ -145,18 +144,18 @@ export default function ChildRole({ context }: ChildRoleProps) {
   };
 
   const handleSave = () => {
-    if (!context.isPremium) {
-      context.showToast('Доступно только в Premium', 'error');
-      context.navigateTo('subscription');
+    if (!user?.isPremium) {
+      alert('Доступно только в Premium');
+      navigate('/subscription');
       return;
     }
-    context.showToast('Расчёт сохранён', 'success');
+    alert('Расчёт сохранён');
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header context={context} showBack />
-      
+      <Header />
+
       <main className="flex-1 pt-16 md:pt-20 pb-8">
         <div className="max-w-[1280px] mx-auto px-4 py-8">
           <h1 className="mb-8 text-gray-900">Роль ребёнка в роду</h1>
@@ -299,7 +298,7 @@ export default function ChildRole({ context }: ChildRoleProps) {
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
               <h3 className="mb-3 text-gray-900">О роли ребёнка в роду</h3>
               <p className="text-gray-700 mb-3">
-                Каждый ребёнок приходит в семью с определённой кармической задачей. 
+                Каждый ребёнок приходит в семью с определённой кармической задачей.
                 Понимание роли ребёнка помогает родителям:
               </p>
               <ul className="space-y-2 text-gray-700 list-disc list-inside">

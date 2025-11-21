@@ -1,13 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { AppContextType } from '../App';
+import { useAuthStore } from '../store/useAuthStore';
 import { Plus, User, Users, Baby } from 'lucide-react';
 import { getArcanaData } from '../data/arcanas';
-
-interface DashboardProps {
-  context: AppContextType;
-}
 
 type DashboardTab = 'matrices' | 'compatibility' | 'children';
 
@@ -50,14 +47,16 @@ const mockProfiles: SavedProfile[] = [
   }
 ];
 
-export default function Dashboard({ context }: DashboardProps) {
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<DashboardTab>('matrices');
 
-  if (!context.isPremium) {
+  if (!user?.isPremium) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header context={context} showBack />
-        
+        <Header />
+
         <main className="flex-1 pt-16 md:pt-20 pb-8 flex items-center justify-center">
           <div className="max-w-md mx-auto px-4 text-center">
             <div className="bg-white rounded-lg shadow-md p-8">
@@ -66,7 +65,7 @@ export default function Dashboard({ context }: DashboardProps) {
                 Личный кабинет и сохранение профилей доступны только для Premium пользователей
               </p>
               <button
-                onClick={() => context.navigateTo('subscription')}
+                onClick={() => navigate('/subscription')}
                 className="px-8 py-3 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition-colors"
               >
                 Оформить Premium
@@ -89,8 +88,8 @@ export default function Dashboard({ context }: DashboardProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header context={context} showBack />
-      
+      <Header />
+
       <main className="flex-1 pt-16 md:pt-20 pb-8">
         <div className="max-w-[1280px] mx-auto px-4 py-8">
           <h1 className="mb-8 text-gray-900">Мои сохранённые профили</h1>
@@ -103,33 +102,30 @@ export default function Dashboard({ context }: DashboardProps) {
                 <nav className="space-y-2">
                   <button
                     onClick={() => setActiveTab('matrices')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
-                      activeTab === 'matrices'
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${activeTab === 'matrices'
                         ? 'bg-purple-50 text-purple-700'
                         : 'text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <User size={20} />
                     Мои матрицы
                   </button>
                   <button
                     onClick={() => setActiveTab('compatibility')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
-                      activeTab === 'compatibility'
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${activeTab === 'compatibility'
                         ? 'bg-purple-50 text-purple-700'
                         : 'text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <Users size={20} />
                     Совместимости
                   </button>
                   <button
                     onClick={() => setActiveTab('children')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
-                      activeTab === 'children'
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${activeTab === 'children'
                         ? 'bg-purple-50 text-purple-700'
                         : 'text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <Baby size={20} />
                     Дети
@@ -143,33 +139,30 @@ export default function Dashboard({ context }: DashboardProps) {
               <div className="bg-white rounded-lg shadow-md p-2 flex gap-2">
                 <button
                   onClick={() => setActiveTab('matrices')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'matrices'
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${activeTab === 'matrices'
                       ? 'bg-purple-700 text-white'
                       : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <User size={18} />
                   <span className="hidden sm:inline">Матрицы</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('compatibility')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'compatibility'
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${activeTab === 'compatibility'
                       ? 'bg-purple-700 text-white'
                       : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <Users size={18} />
                   <span className="hidden sm:inline">Пары</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('children')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'children'
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors ${activeTab === 'children'
                       ? 'bg-purple-700 text-white'
                       : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <Baby size={18} />
                   <span className="hidden sm:inline">Дети</span>
@@ -183,9 +176,9 @@ export default function Dashboard({ context }: DashboardProps) {
               <div className="mb-6">
                 <button
                   onClick={() => {
-                    if (activeTab === 'matrices') context.navigateTo('matrix-result');
-                    if (activeTab === 'compatibility') context.navigateTo('compatibility');
-                    if (activeTab === 'children') context.navigateTo('child-role');
+                    if (activeTab === 'matrices') navigate('/');
+                    if (activeTab === 'compatibility') navigate('/compatibility');
+                    if (activeTab === 'children') navigate('/child-role');
                   }}
                   className="flex items-center gap-2 px-6 py-3 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition-colors"
                 >
@@ -201,7 +194,7 @@ export default function Dashboard({ context }: DashboardProps) {
                     <button
                       key={profile.id}
                       onClick={() => {
-                        context.showToast(`Открыт профиль: ${profile.name}`, 'success');
+                        alert(`Открыт профиль: ${profile.name}`);
                       }}
                       className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-all text-left"
                     >
@@ -229,9 +222,9 @@ export default function Dashboard({ context }: DashboardProps) {
                   </p>
                   <button
                     onClick={() => {
-                      if (activeTab === 'matrices') context.navigateTo('matrix-result');
-                      if (activeTab === 'compatibility') context.navigateTo('compatibility');
-                      if (activeTab === 'children') context.navigateTo('child-role');
+                      if (activeTab === 'matrices') navigate('/');
+                      if (activeTab === 'compatibility') navigate('/compatibility');
+                      if (activeTab === 'children') navigate('/child-role');
                     }}
                     className="px-6 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition-colors"
                   >

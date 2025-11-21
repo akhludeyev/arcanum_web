@@ -1,18 +1,17 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Spinner from '../components/Spinner';
-import { AppContextType } from '../App';
+import { useAuthStore } from '../store/useAuthStore';
 import { getArcanaData, getRandomArcana } from '../data/arcanas';
 import { User, Lock, Download } from 'lucide-react';
 
-interface CompatibilityProps {
-  context: AppContextType;
-}
-
 type Tab = 'positive' | 'negative' | 'recommendations';
 
-export default function Compatibility({ context }: CompatibilityProps) {
+export default function Compatibility() {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [person1Date, setPerson1Date] = useState('');
   const [person2Date, setPerson2Date] = useState('');
   const [isCalculating, setIsCalculating] = useState(false);
@@ -22,7 +21,7 @@ export default function Compatibility({ context }: CompatibilityProps) {
   const formatDate = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     let formatted = '';
-    
+
     if (numbers.length > 0) {
       formatted = numbers.substring(0, 2);
     }
@@ -32,25 +31,25 @@ export default function Compatibility({ context }: CompatibilityProps) {
     if (numbers.length > 4) {
       formatted += '.' + numbers.substring(4, 8);
     }
-    
+
     return formatted;
   };
 
   const handleCalculate = () => {
     if (!person1Date || !person2Date) {
-      context.showToast('Пожалуйста, введите обе даты рождения', 'error');
+      alert('Пожалуйста, введите обе даты рождения');
       return;
     }
 
     setIsCalculating(true);
-    
+
     setTimeout(() => {
       const compatibility = Math.floor(Math.random() * 40) + 60; // 60-100%
       const karmicArcana = getRandomArcana();
       const favorability = compatibility >= 80 ? 'Очень благоприятная' :
-                          compatibility >= 70 ? 'Благоприятная' :
-                          compatibility >= 60 ? 'Умеренная' : 'Сложная';
-      
+        compatibility >= 70 ? 'Благоприятная' :
+          compatibility >= 60 ? 'Умеренная' : 'Сложная';
+
       setResult({
         compatibility,
         karmicArcana,
@@ -62,12 +61,12 @@ export default function Compatibility({ context }: CompatibilityProps) {
   };
 
   const handleDownloadPDF = () => {
-    if (!context.isPremium) {
-      context.showToast('Доступно только в Premium', 'error');
-      context.navigateTo('subscription');
+    if (!user?.isPremium) {
+      alert('Доступно только в Premium');
+      navigate('/subscription');
       return;
     }
-    context.showToast('PDF скачивается...', 'success');
+    alert('PDF скачивается...');
   };
 
   const getCompatibilityColor = (value: number) => {
@@ -78,8 +77,8 @@ export default function Compatibility({ context }: CompatibilityProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header context={context} showBack />
-      
+      <Header />
+
       <main className="flex-1 pt-16 md:pt-20 pb-8">
         <div className="max-w-[1280px] mx-auto px-4 py-8">
           <h1 className="mb-8 text-gray-900">Совместимость пары</h1>
@@ -162,7 +161,7 @@ export default function Compatibility({ context }: CompatibilityProps) {
                       onClick={handleDownloadPDF}
                       className="flex items-center gap-2 px-4 py-2 border border-purple-700 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors mx-auto md:mx-0"
                     >
-                      {!context.isPremium && <Lock size={16} />}
+                      {!user?.isPremium && <Lock size={16} />}
                       <Download size={16} />
                       Скачать отчёт пары в PDF
                     </button>
@@ -178,31 +177,28 @@ export default function Compatibility({ context }: CompatibilityProps) {
                 <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
                   <button
                     onClick={() => setActiveTab('positive')}
-                    className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
-                      activeTab === 'positive'
-                        ? 'border-purple-700 text-purple-700'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`px-4 py-2 -mb-px border-b-2 transition-colors ${activeTab === 'positive'
+                      ? 'border-purple-700 text-purple-700'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
                   >
                     Позитивная реализация
                   </button>
                   <button
                     onClick={() => setActiveTab('negative')}
-                    className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
-                      activeTab === 'negative'
-                        ? 'border-purple-700 text-purple-700'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`px-4 py-2 -mb-px border-b-2 transition-colors ${activeTab === 'negative'
+                      ? 'border-purple-700 text-purple-700'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
                   >
                     Негативная реализация
                   </button>
                   <button
                     onClick={() => setActiveTab('recommendations')}
-                    className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
-                      activeTab === 'recommendations'
-                        ? 'border-purple-700 text-purple-700'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`px-4 py-2 -mb-px border-b-2 transition-colors ${activeTab === 'recommendations'
+                      ? 'border-purple-700 text-purple-700'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
                   >
                     Рекомендации паре
                   </button>
@@ -250,8 +246,8 @@ export default function Compatibility({ context }: CompatibilityProps) {
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
                 <h3 className="mb-3 text-gray-900">О кармической задаче пары</h3>
                 <p className="text-gray-700 mb-4">
-                  Кармический аркан {result.karmicArcana} — {getArcanaData(result.karmicArcana).name} показывает 
-                  главную задачу, которую вы пришли решить вместе. Проработка этого аркана укрепит 
+                  Кармический аркан {result.karmicArcana} — {getArcanaData(result.karmicArcana).name} показывает
+                  главную задачу, которую вы пришли решить вместе. Проработка этого аркана укрепит
                   ваши отношения и выведет их на новый уровень.
                 </p>
                 <p className="text-gray-600 text-sm">
@@ -266,7 +262,7 @@ export default function Compatibility({ context }: CompatibilityProps) {
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
               <h3 className="mb-3 text-gray-900">О расчёте совместимости</h3>
               <p className="text-gray-700 mb-3">
-                Кармическая совместимость показывает, насколько гармонично сочетаются энергии двух людей 
+                Кармическая совместимость показывает, насколько гармонично сочетаются энергии двух людей
                 и какие уроки они пришли пройти вместе.
               </p>
               <ul className="space-y-2 text-gray-700 list-disc list-inside">
