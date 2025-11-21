@@ -1,21 +1,14 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/akhludeyev/arcanum/api/internal/config"
-)
+	"arcanum/internal/config"
+	"arcanum/internal/utils"
 
-type Claims struct {
-	UserID    string `json:"userId"`
-	Email     string `json:"email"`
-	IsPremium bool   `json:"isPremium"`
-	jwt.RegisteredClaims
-}
+	"github.com/gin-gonic/gin"
+)
 
 func JWTAuth(cfg *config.JWTConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -36,31 +29,22 @@ func JWTAuth(cfg *config.JWTConfig) gin.HandlerFunc {
 
 		tokenString := parts[1]
 
-		// Парсим и валидируем токен
-		token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return []byte(cfg.Secret), nil
-		})
-
+		// Валидируем токен используя утилиту
+		claims, err := utils.ValidateToken(tokenString, cfg.Secret)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			if err == utils.ErrExpiredToken {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Token has expired"})
+			} else {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			}
 			c.Abort()
 			return
 		}
 
-		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-			// Сохраняем данные пользователя в контексте
-			c.Set("userID", claims.UserID)
-			c.Set("email", claims.Email)
-			c.Set("isPremium", claims.IsPremium)
-			c.Next()
-		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
-			c.Abort()
-			return
-		}
+		// Сохраняем данные пользователя в контексте
+		c.Set("userID", claims.UserID)
+		c.Set("email", claims.Email)
+		c.Next()
 	}
 }
 

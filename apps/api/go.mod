@@ -1,4 +1,4 @@
-module github.com/akhludeyev/arcanum/api
+module arcanum
 
 go 1.21
 
